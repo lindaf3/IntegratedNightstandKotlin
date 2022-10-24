@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">IntegratedNightstand</string>
+    <string name="set_alarm_interval">Set Alarm Interval</string>
+    <string name="set">SET</string>
+    <string name="to">to</string>
+    <string name="alarm_start">Alarm Start</string>
+    <string name="alarm_end">Alarm End</string>
+
+</resources>
