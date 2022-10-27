@@ -22,6 +22,8 @@ class MainActivity : AppCompatActivity() {
         var endMinute :Int = -1
 
         alarmStart.setOnClickListener{
+            startHour = -1
+            startMinute = -1
             val startTimePicker: MaterialTimePicker = MaterialTimePicker.Builder()
                 .setTitleText("Select Alarm Start")
                 .setHour(7)
@@ -36,6 +38,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         alarmEnd.setOnClickListener{
+            endHour = -1
+            endMinute = -1
             val endTimePicker: MaterialTimePicker = MaterialTimePicker.Builder()
                 .setTitleText("Select Alarm End")
                 .setHour(7)
@@ -57,17 +61,24 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(applicationContext, "Invalid alarm, please try again.", Toast.LENGTH_SHORT).show()
                 alarmStart.text = "Alarm Start"
                 alarmEnd.text = "Alarm End"
+                startHour = -1
+                endHour = -1
+                startMinute = -1
+                endHour = -1
             }
 
         }
     }
 
     private fun validAlarm(startHour: Int, startMinute: Int, endHour: Int, endMinute: Int): Boolean {
-        return if(startHour == endHour){
-            endMinute > startMinute
+        return if(startHour == -1 ||  endHour == -1 || startMinute == -1 || endMinute == -1 ){
+            return false
+        }
+        else if(startHour == endHour){
+            endMinute >= startMinute
         } else if(startHour < endHour){
             true
-        } else startHour == 23 && endHour == 0
+        } else endHour == 0
 
     }
 
