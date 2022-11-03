@@ -12,5 +12,6 @@
     <string name="view_data">View Data</string>
     <string name="set_data">SET DATA</string>
     <string name="bottom_tab">bottom tab</string>
+    <string name="refresh">Refresh</string>
 
 </resources>

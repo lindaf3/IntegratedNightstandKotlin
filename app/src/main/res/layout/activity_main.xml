@@ -23,15 +23,22 @@
         android:contentDescription="@string/bottom_tab"
         app:tabGravity="fill"
         app:tabMode="fixed"
-        app:tabTextColor="@color/white">
+        app:tabTextColor="@color/white"
+        app:tabIconTint="@color/white">
         <com.google.android.material.tabs.TabItem
             android:id="@+id/setAlarm"
+            android:visible="true"
+            android:icon="@drawable/ic_baseline_access_alarm_24"
+            android:enabled="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/set_alarm" />
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/viewData"
+            android:visible="true"
+            android:icon="@drawable/ic_baseline_auto_graph_24"
+            android:enabled="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/view_data" />
