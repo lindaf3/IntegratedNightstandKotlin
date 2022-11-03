@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ViewDataFragment"
+    android:background="@drawable/gradient_bg_reverse">
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="-14dp"
+        android:layout_marginBottom="-14dp"
+        android:contentDescription="@string/starry_sky"
+        android:scaleType="fitStart"
+        app:srcCompat="@drawable/stars" />
+
+    <Button
+        android:id="@+id/alarmEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="238dp"
+        android:layout_marginTop="428dp"
+        android:text="@string/alarm_end" />
+
+    <Button
+        android:id="@+id/alarmStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="49dp"
+        android:layout_marginTop="428dp"
+        android:text="@string/alarm_start" />
+
+    <TextView
+        android:id="@+id/alarmHeading2"
+        android:layout_width="69dp"
+        android:layout_height="37dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="176dp"
+        android:layout_marginTop="437dp"
+        android:text="@string/to"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/alarmHeading"
+        android:layout_width="174dp"
+        android:layout_height="180dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="false"
+        android:layout_marginStart="115dp"
+        android:layout_marginTop="221dp"
+        android:text="@string/set_alarm_interval"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="40sp" />
+
+    <Button
+        android:id="@+id/alarmSetter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:layout_marginEnd="147dp"
+        android:layout_marginBottom="115dp"
+        android:text="@string/set" />
+
+
+</RelativeLayout>

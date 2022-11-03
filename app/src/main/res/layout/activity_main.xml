@@ -7,81 +7,41 @@
     android:background="@drawable/gradient_bg"
     tools:context=".MainActivity">
 
-
-    <ImageView
-        android:id="@+id/imageView2"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
+        android:layout_above="@id/bottomTab"/>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/bottomTab"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabMaxWidth="0dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="-14dp"
-        android:layout_marginBottom="-14dp"
-        android:contentDescription="@string/starry_sky"
-        android:scaleType="fitStart"
-        app:srcCompat="@drawable/stars" />
+        android:background="@color/black"
+        android:contentDescription="@string/bottom_tab"
+        app:tabGravity="fill"
+        app:tabMode="fixed"
+        app:tabTextColor="@color/white">
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/setAlarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/set_alarm" />
 
-    <Button
-        android:id="@+id/alarmEnd"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="238dp"
-        android:layout_marginTop="428dp"
-        android:text="@string/alarm_end" />
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/viewData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/view_data" />
+        />
 
-    <Button
-        android:id="@+id/alarmStart"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_centerInParent="true"
-        android:layout_marginStart="49dp"
-        android:layout_marginTop="428dp"
-        android:text="@string/alarm_start" />
 
-    <TextView
-        android:id="@+id/alarmHeading2"
-        android:layout_width="69dp"
-        android:layout_height="37dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_centerInParent="true"
-        android:layout_marginStart="176dp"
-        android:layout_marginTop="437dp"
-        android:text="@string/to"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="20sp" />
+    </com.google.android.material.tabs.TabLayout>
 
-    <Button
-        android:id="@+id/alarmSetter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
-        android:layout_marginEnd="140dp"
-        android:layout_marginBottom="149dp"
-        android:text="@string/set" />
 
-    <TextView
-        android:id="@+id/alarmHeading"
-        android:layout_width="174dp"
-        android:layout_height="180dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="false"
-        android:layout_marginStart="115dp"
-        android:layout_marginTop="221dp"
-        android:text="@string/set_alarm_interval"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="40sp" />
+
+
 
 </RelativeLayout>
