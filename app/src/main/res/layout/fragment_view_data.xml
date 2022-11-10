@@ -15,7 +15,7 @@
         android:layout_marginStart="37dp"
         android:layout_marginTop="31dp"
         app:domainTitle="Time (Hour)"
-        app:rangeTitle="Frequency (Hz)"
+        app:rangeTitle="Amplitude (dB)"
         app:title="Sleep Data" />
 
     <Button

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.fragment.app.setFragmentResult
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 
@@ -30,8 +31,6 @@ class SetAlarmFragment : Fragment() {
         var endMinute :Int = -1
 
         alarmStart.setOnClickListener{
-            startHour = -1
-            startMinute = -1
             val startTimePicker: MaterialTimePicker = MaterialTimePicker.Builder()
                 .setTitleText("Select Alarm Start")
                 .setHour(7)
@@ -44,10 +43,9 @@ class SetAlarmFragment : Fragment() {
                 startMinute = startTimePicker.minute
                 setAlarm(startTimePicker, alarmStart)
             }
+
         }
         alarmEnd.setOnClickListener{
-            endHour = -1
-            endMinute = -1
             val endTimePicker: MaterialTimePicker = MaterialTimePicker.Builder()
                 .setTitleText("Select Alarm End")
                 .setHour(7)
@@ -64,6 +62,13 @@ class SetAlarmFragment : Fragment() {
         alarmSet.setOnClickListener{
             if(validAlarm(startHour, startMinute, endHour, endMinute)){
                 Toast.makeText(requireActivity().application , "Alarm set!", Toast.LENGTH_SHORT).show()
+                val bundle = Bundle()
+                bundle.putInt("start hour", startHour)
+                bundle.putInt("start minute", startMinute)
+                bundle.putInt("end hour", endHour)
+                bundle.putInt("end minute", endMinute)
+                setFragmentResult("requestKey", bundle)
+
             }
             else{
                 Toast.makeText(requireActivity().application, "Invalid alarm, please try again.", Toast.LENGTH_SHORT).show()
