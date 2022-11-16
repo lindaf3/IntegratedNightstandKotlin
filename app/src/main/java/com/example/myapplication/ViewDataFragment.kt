@@ -34,8 +34,8 @@ class ViewDataFragment : Fragment() {
             val endHour = bundle.getInt("end hour")
             val startMinute = bundle.getInt("start minute")
             val endMinute = bundle.getInt("end minute")
-            val domLow = startHour +startMinute/60.0
-            val domHigh = endHour + endMinute/60.0
+            var domLow = startHour +startMinute/60.0
+            var domHigh = endHour + endMinute/60.0
 
             super.onViewCreated(view, savedInstanceState)
             var sleepDataX = mutableListOf<Double>()
@@ -47,6 +47,10 @@ class ViewDataFragment : Fragment() {
             val refresh = view.findViewById<Button>(R.id.refresh)
             graph.addSeries(dataSeries, dataFormat)
 
+            if(startHour == -1 ||startMinute == -1 || endHour == -1 || endMinute == -1){
+                domHigh = 24.0
+                domLow = 0.0
+            }
             graph.setDomainBoundaries(domLow, domHigh, BoundaryMode.FIXED)
             graph.setRangeBoundaries(0, 100, BoundaryMode.FIXED)
 
