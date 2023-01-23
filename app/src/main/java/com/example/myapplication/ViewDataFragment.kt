@@ -9,10 +9,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResultListener
 import com.androidplot.xy.*
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -45,6 +45,8 @@ class ViewDataFragment : Fragment() {
 
         val graph = view.findViewById<XYPlot>(R.id.graph)
         val refresh = view.findViewById<Button>(R.id.refresh)
+        val timeSet = view.findViewById<TextView>(R.id.timeSet)
+
         graph.addSeries(dataSeries, dataFormat)
 
         graph.setDomainBoundaries(domBounds.first, domBounds.second, BoundaryMode.FIXED)
@@ -78,6 +80,12 @@ class ViewDataFragment : Fragment() {
             domHigh = 24.0
             domLow = 0.0
         }
+        if(startHour == 23 && endHour == 0){
+            domHigh = 12.0 + endMinute/60.0
+            domLow = 11.0 + startMinute/60.0
+            println(domLow)
+            println(domHigh)
+        }
         return Pair(domLow, domHigh)
 
     }
@@ -97,7 +105,6 @@ class ViewDataFragment : Fragment() {
         println(time)
         return arrayOf(Pair(time,amplitude))
     }
-
 }
 
 

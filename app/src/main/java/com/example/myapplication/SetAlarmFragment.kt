@@ -106,7 +106,7 @@ class SetAlarmFragment : Fragment() {
                 startMinute = -1
                 endMinute = -1
                 saveTimes(startHour, startMinute, endHour,endMinute, "Alarm Start", "Alarm End")
-                Toast.makeText(requireActivity().application, "Invalid alarm, please try again.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireActivity().application, "Invalid alarm, please try again with a valid one hour interval.", Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -134,17 +134,24 @@ class SetAlarmFragment : Fragment() {
 
     }
 
-
+// 1 hour intervals allowed max
     private fun validAlarm(startHour: Int, startMinute: Int, endHour: Int, endMinute: Int): Boolean {
-        return if(startHour == -1 ||  endHour == -1 || startMinute == -1 || endMinute == -1 ){
+        if(startHour == -1 ||  endHour == -1 || startMinute == -1 || endMinute == -1 ){
+           return false
+        }
+        else if(endHour == 0){
+            return (startHour == 0 && endMinute >= startMinute) || (startHour == 23 && endMinute <= startMinute)
+        }
+        else if(endHour - startHour > 1){
             return false
         }
-        else if(startHour == endHour){
-            endMinute >= startMinute
-        } else if(startHour < endHour){
-            true
-        } else endHour == 0
-
+        else if(endHour - startHour == 1){
+            return endMinute <= startMinute
+        }
+        else if (endHour == startHour){
+            return endMinute >= startMinute
+        }
+        else return false
     }
 
     private fun setAlarm( picker: MaterialTimePicker, btn: Button) {

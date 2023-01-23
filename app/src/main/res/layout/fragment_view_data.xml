@@ -24,8 +24,16 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="71dp"
+        android:layout_marginBottom="136dp"
         android:text="@string/refresh" />
+
+    <TextView
+        android:id="@+id/timeSet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="88dp" />
 
 
 </RelativeLayout>
