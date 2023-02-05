@@ -155,7 +155,10 @@ class SetAlarmFragment : Fragment() {
     }
 
     private fun setAlarm( picker: MaterialTimePicker, btn: Button) {
-        var hour: Int = picker.hour
+        btn.text = getAlarmTime(picker.hour, picker.minute)
+    }
+    private fun getAlarmTime(h: Int, min: Int):String {
+        var hour = h
         var am_pm = "AM"
         if(hour > 12){
             hour -= 12
@@ -164,7 +167,7 @@ class SetAlarmFragment : Fragment() {
         else if(hour == 0){
             hour = 12
         }
-        btn.text = String.format("%02d:%02d %s", hour, picker.minute, am_pm)
+        return String.format("%02d:%02d %s", hour, min, am_pm)
     }
 
 
