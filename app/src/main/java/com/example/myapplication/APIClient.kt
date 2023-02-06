@@ -1,3 +1,4 @@
+import Amplitude.getAmplitude
 import android.os.Build
 import androidx.annotation.RequiresApi
 import java.lang.Integer.max
@@ -19,9 +20,7 @@ class APIClient(token: String) {
         return cloudData;
     }
 
-    private fun getAmplitude(): Double {
-        return 100*Math.random()
-    }
+
     // assuming this would only be called when the dates are the same
     @RequiresApi(Build.VERSION_CODES.O)
     private fun timeDifferenceInMinutes(startDatetime: ZonedDateTime, endDatetime: ZonedDateTime): Int {
@@ -34,4 +33,9 @@ class APIClient(token: String) {
         return datetime.minusMinutes(-minutes.toLong()).format(DateTimeFormatter.ISO_DATE_TIME)
     }
 
+}
+object Amplitude{
+    fun getAmplitude(): Double {
+        return 100*Math.random()
+    }
 }
