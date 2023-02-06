@@ -17,6 +17,9 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.androidplot.xy.*
 import java.io.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -65,7 +68,7 @@ class ViewDataFragment : Fragment() {
             endMinute = times?.getInt("end minute", -1) ?: -1
             domBounds = getDomBounds(startHour, startMinute, endHour, endMinute)
 
-            val updatedData = updateGraph()
+            val updatedData = updateGraph(startHour, startMinute, endHour, endMinute)
             for ( (time,amplitude) in updatedData) {
                 if(withinRange(time, startHour, startMinute, endHour, endMinute)){
                     sleepDataX.add(time)
@@ -98,20 +101,23 @@ class ViewDataFragment : Fragment() {
         if(startHour == 23 && endHour == 0){
             domHigh = 12.0 + endMinute/60.0
             domLow = 11.0 + startMinute/60.0
-            println(domLow)
-            println(domHigh)
         }
         return Pair(domLow, domHigh)
 
     }
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun updateGraph(): MutableList<Pair<Double, Double>> {
+    private fun updateGraph(startHour: Int, startMinute: Int, endHour: Int, endMinute: Int): MutableList<Pair<Double, Double>> {
         val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
         val date = ZonedDateTime.now()
         val dateString = date.format(DateTimeFormatter.ISO_DATE)
-        println(dateString)
+        val startTime = LocalTime.of(startHour, startMinute)
+        val endTime = LocalTime.of(endHour, endMinute)
+        val startInterval = ZonedDateTime.of(LocalDate.now(), startTime, date.zone)
+        val endInterval = ZonedDateTime.of(LocalDate.now(), endTime, date.zone)
+        val startString = startInterval.format(DateTimeFormatter.ISO_DATE_TIME)
+        val endString = endInterval.format(DateTimeFormatter.ISO_DATE_TIME)
         val parsedCloudData = mutableListOf<Pair<Double,Double>>()
-        val cloudData = cloudClient.querySoundData(dateString)
+        val cloudData = cloudClient.querySoundData(dateString, startString, endString)
         for(data: Pair<String, Double> in cloudData) {
             parsedCloudData.add(getCloudDataPoint(data.first, data.second))
         }
@@ -122,9 +128,6 @@ class ViewDataFragment : Fragment() {
     private fun getCloudDataPoint(timestamp: String, amplitude: Double): Pair<Double, Double>{
         val datetime = ZonedDateTime.parse(timestamp)
         val time: Double = timeToDouble(datetime.hour,datetime.minute)
-        println(datetime.hour)
-        println(datetime.minute)
-        println(time)
         return Pair(time,amplitude)
     }
 
@@ -137,7 +140,7 @@ class ViewDataFragment : Fragment() {
         }
         val minInterval = timeToDouble(startHour, startMinute)
         val maxInterval = timeToDouble(endHour, endMinute)
-        return time in maxInterval..minInterval
+        return time in minInterval..maxInterval
     }
 
 }

@@ -10,7 +10,7 @@ class CloudClient(key: String, token: String) {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun querySoundData(sessionDate: String, from: String = "", to: String = ""): Array<Pair<String, Double>> {
+    fun querySoundData(sessionDate: String, from: String = "", to: String = ""): MutableList<Pair<String, Double>> {
         return apiClient.querySoundData(sessionDate, from, to)
     }
 }
