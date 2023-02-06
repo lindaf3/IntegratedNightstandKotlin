@@ -42,7 +42,6 @@ class ViewDataFragment : Fragment() {
         var endMinute :Int = times?.getInt("end minute", -1) ?: -1
         var domBounds = getDomBounds(startHour, startMinute, endHour, endMinute)
 
-        super.onViewCreated(view, savedInstanceState)
         val sleepDataX = mutableListOf<Double>()
         val sleepData = mutableListOf<Double>()
         val dataSeries: XYSeries = SimpleXYSeries(sleepDataX.toList(), sleepData.toList(), "Sleep Data" )
@@ -60,20 +59,23 @@ class ViewDataFragment : Fragment() {
             sleepData.clear()
             sleepDataX.clear()
             graph.clear()
-            val updatedData = updateGraph()
-            for ( (time,amplitude) in updatedData) {
-                sleepDataX.add(time)
-                sleepData.add(amplitude)
-            }
-            val updatedDataSeries: XYSeries = SimpleXYSeries(sleepDataX.toList(), sleepData.toList(), "Sleep Data" )
-            graph.addSeries(updatedDataSeries, dataFormat)
             startHour = times?.getInt("start hour", -1) ?: -1
             startMinute = times?.getInt("start minute", -1) ?: -1
             endHour = times?.getInt("end hour", -1) ?: -1
             endMinute = times?.getInt("end minute", -1) ?: -1
             domBounds = getDomBounds(startHour, startMinute, endHour, endMinute)
-            if(startHour != -1 && endHour != -1 && startMinute != -1 && endMinute != -1){
-                timeSet.text = String.format("Start Time: %s, End Time: %s", getAlarmTime(startHour, startMinute), getAlarmTime(endHour, endMinute) )
+
+            val updatedData = updateGraph()
+            for ( (time,amplitude) in updatedData) {
+                if(withinRange(time, startHour, startMinute, endHour, endMinute)){
+                    sleepDataX.add(time)
+                    sleepData.add(amplitude)
+                }
+            }
+            val updatedDataSeries: XYSeries = SimpleXYSeries(sleepDataX.toList(), sleepData.toList(), "Sleep Data" )
+            graph.addSeries(updatedDataSeries, dataFormat)
+            if(!AlarmClock.notInitiated(startHour, startMinute, endHour, endMinute)){
+                timeSet.text = String.format("Start Time: %s, End Time: %s", AlarmClock.getAlarmTime(startHour, startMinute), AlarmClock.getAlarmTime(endHour, endMinute) )
             }
             else{
                 timeSet.text = "No given valid alarm interval"
@@ -89,7 +91,7 @@ class ViewDataFragment : Fragment() {
     {
         var domLow = timeToDouble(startHour, startMinute)
         var domHigh = timeToDouble(endHour, endMinute)
-        if(startHour == -1 ||startMinute == -1 || endHour == -1 || endMinute == -1){
+        if(AlarmClock.notInitiated(startHour, startMinute, endHour, endMinute)){
             domHigh = 24.0
             domLow = 0.0
         }
@@ -129,18 +131,15 @@ class ViewDataFragment : Fragment() {
     private fun timeToDouble(hour: Int, min: Int): Double{
         return hour + min/60.0
     }
-    private fun getAlarmTime(h: Int, min: Int):String {
-        var hour = h
-        var am_pm = "AM"
-        if(hour > 12){
-            hour -= 12
-            am_pm = "PM"
+    private fun withinRange(time: Double, startHour: Int, startMinute: Int, endHour: Int, endMinute: Int): Boolean{
+        if(AlarmClock.notInitiated(startHour, startMinute, endHour, endMinute)){
+            return false
         }
-        else if(hour == 0){
-            hour = 12
-        }
-        return String.format("%02d:%02d %s", hour, min, am_pm)
+        val minInterval = timeToDouble(startHour, startMinute)
+        val maxInterval = timeToDouble(endHour, endMinute)
+        return time in maxInterval..minInterval
     }
+
 }
 
 

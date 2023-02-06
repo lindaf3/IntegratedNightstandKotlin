@@ -125,18 +125,11 @@ class SetAlarmFragment : Fragment() {
             putString("start time", timeStart)
             putString("end time", timeEnd)
         }?.apply()
-        val bundle = Bundle()
-        bundle.putInt("start hour", startHour)
-        bundle.putInt("start minute", startMinute)
-        bundle.putInt("end hour", endHour)
-        bundle.putInt("end minute", endMinute)
-        setFragmentResult("requestKey", bundle)
-
     }
 
 // 1 hour intervals allowed max
     private fun validAlarm(startHour: Int, startMinute: Int, endHour: Int, endMinute: Int): Boolean {
-        if(startHour == -1 ||  endHour == -1 || startMinute == -1 || endMinute == -1 ){
+        if(AlarmClock.notInitiated(startHour, startMinute, endHour, endMinute)){
            return false
         }
         else if(endHour == 0){
@@ -155,21 +148,8 @@ class SetAlarmFragment : Fragment() {
     }
 
     private fun setAlarm( picker: MaterialTimePicker, btn: Button) {
-        btn.text = getAlarmTime(picker.hour, picker.minute)
+        btn.text = AlarmClock.getAlarmTime(picker.hour, picker.minute)
     }
-    private fun getAlarmTime(h: Int, min: Int):String {
-        var hour = h
-        var am_pm = "AM"
-        if(hour > 12){
-            hour -= 12
-            am_pm = "PM"
-        }
-        else if(hour == 0){
-            hour = 12
-        }
-        return String.format("%02d:%02d %s", hour, min, am_pm)
-    }
-
 
 
 }

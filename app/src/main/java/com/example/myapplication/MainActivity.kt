@@ -20,9 +20,6 @@ class MainActivity : AppCompatActivity() {
         val pager: ViewPager2 = findViewById(R.id.viewPager)
         pager.adapter = BottomTabAdapter(this)
         pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-            }
         })
 
         val bottomTab: TabLayout = findViewById(R.id.bottomTab)
