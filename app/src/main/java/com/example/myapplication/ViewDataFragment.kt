@@ -54,7 +54,6 @@ class ViewDataFragment : Fragment() {
         val refresh = view.findViewById<Button>(R.id.refresh)
         val timeSet = view.findViewById<TextView>(R.id.timeSet)
         graph.addSeries(dataSeries, dataFormat)
-
         graph.setDomainBoundaries(domBounds.first, domBounds.second, BoundaryMode.FIXED)
         graph.setRangeBoundaries(0, 100, BoundaryMode.FIXED)
 
