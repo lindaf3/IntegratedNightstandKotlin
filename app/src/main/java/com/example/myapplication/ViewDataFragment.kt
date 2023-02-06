@@ -57,6 +57,8 @@ class ViewDataFragment : Fragment() {
         graph.setRangeBoundaries(0, 100, BoundaryMode.FIXED)
 
         refresh.setOnClickListener{
+            sleepData.clear()
+            sleepDataX.clear()
             graph.clear()
             val updatedData = updateGraph()
             for ( (time,amplitude) in updatedData) {
