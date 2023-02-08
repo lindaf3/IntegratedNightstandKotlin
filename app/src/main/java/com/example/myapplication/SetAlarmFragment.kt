@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import com.example.myapplication.AlarmClock.setAlarm
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 
@@ -147,9 +148,6 @@ class SetAlarmFragment : Fragment() {
         else return false
     }
 
-    private fun setAlarm( picker: MaterialTimePicker, btn: Button) {
-        btn.text = AlarmClock.getAlarmTime(picker.hour, picker.minute)
-    }
 
 
 }

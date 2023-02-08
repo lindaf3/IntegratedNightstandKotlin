@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import Amplitude
 import CloudClient
 import android.annotation.SuppressLint
 import android.content.Context
@@ -11,14 +12,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.androidplot.xy.*
+import com.example.myapplication.AlarmClock.setAlarm
+import com.example.myapplication.Date.setDate
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import java.io.*
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -51,61 +56,145 @@ class ViewDataFragment : Fragment() {
         val dataFormat = FastLineAndPointRenderer.Formatter(Color.BLUE, Color.BLACK, null, null)
 
         val graph = view.findViewById<XYPlot>(R.id.graph)
-        val refresh = view.findViewById<Button>(R.id.refresh)
-        val timeSet = view.findViewById<TextView>(R.id.timeSet)
+        val fetch = view.findViewById<Button>(R.id.fetch)
+        val timeStart = view.findViewById<Button>(R.id.timeStart)
+        val timeEnd = view.findViewById<Button>(R.id.timeEnd)
+        val sessionDate = view.findViewById<Button>(R.id.date)
+
+
+
+        var dataStartHour = -1
+        var dataStartMin = -1
+        var dataEndHour = -1
+        var dataEndMin = -1
+        var dateText = ""
+
         graph.addSeries(dataSeries, dataFormat)
         graph.setDomainBoundaries(domBounds.first, domBounds.second, BoundaryMode.FIXED)
-        graph.setRangeBoundaries(0, 100, BoundaryMode.FIXED)
+        graph.setRangeBoundaries(0, 5, BoundaryMode.FIXED)
 
-        refresh.setOnClickListener{
+        timeStart.setOnClickListener{
+            startHour = times?.getInt("start hour", -1) ?: -1
+            startMinute = times?.getInt("start minute", -1) ?: -1
+            val startTimePicker: MaterialTimePicker = MaterialTimePicker.Builder()
+                .setTitleText("Select Time Start")
+                .setHour(startHour)
+                .setMinute(startMinute)
+                .setTimeFormat(TimeFormat.CLOCK_12H)
+                .build()
+            startTimePicker.show(requireActivity().supportFragmentManager, "data start")
+            startTimePicker.addOnPositiveButtonClickListener {
+                dataStartHour = startTimePicker.hour
+                dataStartMin= startTimePicker.minute
+                setAlarm(startTimePicker, timeStart)
+            }
+
+        }
+        timeEnd.setOnClickListener{
+            endHour = times?.getInt("end hour", -1) ?: -1
+            endMinute = times?.getInt("end minute", -1) ?: -1
+            val endTimePicker: MaterialTimePicker = MaterialTimePicker.Builder()
+                .setTitleText("Select Time End")
+                .setHour(endHour)
+                .setMinute(endMinute)
+                .setTimeFormat(TimeFormat.CLOCK_12H)
+                .build()
+            endTimePicker.show(requireActivity().supportFragmentManager, "data end")
+            endTimePicker.addOnPositiveButtonClickListener {
+                dataEndHour = endTimePicker.hour
+                dataEndMin = endTimePicker.minute
+                setAlarm(endTimePicker, timeEnd)
+            }
+
+        }
+        sessionDate.setOnClickListener{
+            val datePicker: MaterialDatePicker<Long> = datePicker()
+                .setTitleText("Select Session Date")
+                .build()
+            datePicker.show(requireActivity().supportFragmentManager, "data date")
+            datePicker.addOnPositiveButtonClickListener {
+                dateText = datePicker.headerText
+                setDate(dateText, sessionDate)
+            }
+        }
+
+
+        fetch.setOnClickListener{
             sleepData.clear()
             sleepDataX.clear()
             graph.clear()
-            startHour = times?.getInt("start hour", -1) ?: -1
-            startMinute = times?.getInt("start minute", -1) ?: -1
-            endHour = times?.getInt("end hour", -1) ?: -1
-            endMinute = times?.getInt("end minute", -1) ?: -1
-            domBounds = getDomBounds(startHour, startMinute, endHour, endMinute)
-            if(AlarmClock.notInitiated(startHour,startMinute, endHour, endMinute)){
-                timeSet.text = "No given valid alarm interval"
-                Toast.makeText(requireActivity().application, "Alarm interval not given!", Toast.LENGTH_SHORT).show()
+
+            domBounds = getDomBounds(dataStartHour, dataStartMin, dataEndHour, dataEndMin)
+            if(AlarmClock.notInitiated(dataStartHour,dataStartMin, dataEndHour, dataEndMin)){
+                Toast.makeText(requireActivity().application, "Data time interval not given!", Toast.LENGTH_SHORT).show()
                 graph.redraw()
             }
-            else{
-                timeSet.text = String.format("Start Time: %s, End Time: %s", AlarmClock.getAlarmTime(startHour, startMinute), AlarmClock.getAlarmTime(endHour, endMinute))
-                val updatedData = updateGraph(startHour, startMinute, endHour, endMinute)
-                if(startHour == 23 && endHour == 0){
-                    val minInterval = timeToDouble(11, startMinute)
-                    val maxInterval = timeToDouble(12, endMinute)
-                    for ( (time,amplitude) in updatedData) {
-                        val newTime = time-12
-                        if(withinRange(newTime, minInterval, maxInterval)){
-                            sleepDataX.add(newTime)
-                            sleepData.add(amplitude)
-                        }
-                    }
-                    //mock code: can delete later
-                    sleepData.add(maxInterval)
-                    sleepDataX.add(Amplitude.getAmplitude())
-                }
-                else{
-                    val minInterval = timeToDouble(startHour, startMinute)
-                    val maxInterval = timeToDouble(endHour, endMinute)
-                    for ( (time,amplitude) in updatedData) {
-                        if(withinRange(time, minInterval, maxInterval)){
-                            sleepDataX.add(time)
-                            sleepData.add(amplitude)
-                        }
-                    }
-                }
-                dataSeries = SimpleXYSeries(sleepDataX, sleepData, "Sleep Data" )
-                graph.addSeries(dataSeries, dataFormat)
-                graph.setDomainBoundaries(domBounds.first, domBounds.second, BoundaryMode.FIXED)
+
+            else if(dateText == ""){
+                Toast.makeText(requireActivity().application, "Session date is not given!", Toast.LENGTH_SHORT).show()
                 graph.redraw()
-                Toast.makeText(requireActivity().application, "Updated data!", Toast.LENGTH_SHORT).show()
+            }
+
+
+            else{
+                val sesDate = Date.parseDate(dateText)
+                val alarmTimes = convertTimesToLocalDates(dataStartHour,dataStartMin, dataEndHour, dataEndMin)
+                if(Date.futureDate(sesDate)){
+                    Toast.makeText(requireActivity().application, "Session date has not occurred yet!", Toast.LENGTH_SHORT).show()
+                    graph.redraw()
+                }
+                else if(alarmTimes.first > alarmTimes.second && !(dataEndHour == 0 && dataStartHour != 1) ){
+                    Toast.makeText(requireActivity().application, "Start time cannot occur later than end time.", Toast.LENGTH_SHORT).show()
+                    graph.redraw()
+                }
+
+                else{
+                    val updatedData: MutableList<Pair<Double, Double>> = updateGraph(sesDate, alarmTimes)
+                    if(dataStartHour >= 12 && dataEndHour == 0){
+                        val minInterval = timeToDouble(dataStartHour - 12, dataStartMin)
+                        val maxInterval = timeToDouble(12, dataEndMin)
+                        for ( (time,amplitude) in updatedData) {
+                            val newTime = time-12
+                            if(withinRange(newTime, minInterval, maxInterval)){
+                                sleepDataX.add(newTime)
+                                sleepData.add(amplitude)
+                            }
+                        }
+                        //mock code: can delete later
+                        sleepData.add(maxInterval)
+                        sleepDataX.add(Amplitude.getAmplitude())
+                    }
+                    else{
+
+                        val minInterval = timeToDouble(dataStartHour, dataStartMin)
+                        val maxInterval = timeToDouble(dataEndHour, dataEndMin)
+                        for ( (time,amplitude) in updatedData) {
+                            if(withinRange(time, minInterval, maxInterval)){
+                                sleepDataX.add(time)
+                                sleepData.add(amplitude)
+                            }
+                        }
+                    }
+                    dataSeries = SimpleXYSeries(sleepDataX, sleepData, "Sleep Data" )
+                    graph.addSeries(dataSeries, dataFormat)
+                    graph.setDomainBoundaries(domBounds.first, domBounds.second, BoundaryMode.FIXED)
+                    graph.redraw()
+                    if(dataSeries.size() == 0){
+                        Toast.makeText(requireActivity().application, "No sleep data was recorded.", Toast.LENGTH_SHORT).show()
+                    }
+                    else{
+                        Toast.makeText(requireActivity().application, "Updated data!", Toast.LENGTH_SHORT).show()
+                    }
+
+                }
+
+
             }
         }
     }
+
+
+
     private fun getDomBounds(startHour: Int, startMinute: Int, endHour: Int, endMinute: Int): Pair<Double, Double>
     {
         var domLow = timeToDouble(startHour, startMinute)
@@ -114,23 +203,27 @@ class ViewDataFragment : Fragment() {
             domHigh = 24.0
             domLow = 0.0
         }
-        if(startHour == 23 && endHour == 0){
-            domHigh = 12.0 + endMinute/60.0
-            domLow = 11.0 + startMinute/60.0
+        if(endHour == 0 && startHour != 0){
+            domHigh = timeToDouble(12,endMinute)
+            if(startHour >= 12){
+                domLow = timeToDouble(startHour - 12,endHour)
+            }
         }
         return Pair(domLow, domHigh)
 
     }
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun updateGraph(startHour: Int, startMinute: Int, endHour: Int, endMinute: Int): MutableList<Pair<Double, Double>> {
+    private fun updateGraph(sesDate: LocalDate, times: Pair<LocalTime, LocalTime>): MutableList<Pair<Double, Double>> {
         val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
-        val date = ZonedDateTime.now()
-        val dateString = date.format(DateTimeFormatter.ISO_DATE)
+        val dateString = sesDate.format(DateTimeFormatter.ISO_DATE)
         val parsedCloudData = mutableListOf<Pair<Double,Double>>()
-        val startTime = LocalTime.of(startHour, startMinute)
-        val endTime = LocalTime.of(endHour, endMinute)
-        val startInterval = ZonedDateTime.of(LocalDate.now(), startTime, date.zone)
-        val endInterval = ZonedDateTime.of(LocalDate.now(), endTime, date.zone)
+        val endDate = sesDate
+        // for right now, I am allowing 12:00 am end times be valid for the database. This could be considered unacceptable in later editions.
+        if(times.second.hour == 0 && times.first.hour != 0){
+            endDate.minusDays(-1)
+        }
+        val startInterval = ZonedDateTime.of(sesDate, times.first, ZonedDateTime.now().zone)
+        val endInterval = ZonedDateTime.of(endDate, times.second, ZonedDateTime.now().zone)
         val startString = startInterval.format(DateTimeFormatter.ISO_DATE_TIME)
         val endString = endInterval.format(DateTimeFormatter.ISO_DATE_TIME)
         val cloudData = cloudClient.querySoundData(dateString, startString, endString)
@@ -138,6 +231,13 @@ class ViewDataFragment : Fragment() {
             parsedCloudData.add(getCloudDataPoint(data.first, data.second))
         }
         return parsedCloudData
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun convertTimesToLocalDates(startHour: Int, startMinute: Int, endHour: Int, endMinute: Int): Pair<LocalTime, LocalTime>{
+        val startTime = LocalTime.of(startHour, startMinute)
+        val endTime = LocalTime.of(endHour, endMinute)
+        return Pair(startTime, endTime)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -149,14 +249,6 @@ class ViewDataFragment : Fragment() {
 
     private fun timeToDouble(hour: Int, min: Int): Double{
         return hour + min/60.0
-    }
-    private fun withinRange(time: Double, startHour: Int, startMinute: Int, endHour: Int, endMinute: Int): Boolean{
-        if(AlarmClock.notInitiated(startHour, startMinute, endHour, endMinute)){
-            return false
-        }
-        val minInterval = timeToDouble(startHour, startMinute)
-        val maxInterval = timeToDouble(endHour, endMinute)
-        return time in minInterval..maxInterval
     }
     private fun withinRange(time: Double, minInterval: Double, maxInterval: Double): Boolean{
         return time in minInterval..maxInterval

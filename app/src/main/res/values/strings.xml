@@ -15,5 +15,9 @@
     <string name="refresh">Refresh</string>
     <string name="clear">Clear</string>
     <string name="click_refresh_to_see_time_interval_chosen">Click Refresh to See Time Interval Chosen</string>
+    <string name="time_start">Time Start</string>
+    <string name="fetch">fetch</string>
+    <string name="time_end">Time End</string>
+    <string name="date">Date</string>
 
 </resources>

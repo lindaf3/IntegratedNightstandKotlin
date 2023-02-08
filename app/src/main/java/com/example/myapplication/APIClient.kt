@@ -36,6 +36,6 @@ class APIClient(token: String) {
 }
 object Amplitude{
     fun getAmplitude(): Double {
-        return 100*Math.random()
+        return 5.0*Math.random()
     }
 }
