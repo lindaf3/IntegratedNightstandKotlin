@@ -60,6 +60,7 @@ class ViewDataFragment : Fragment() {
         val timeStart = view.findViewById<Button>(R.id.timeStart)
         val timeEnd = view.findViewById<Button>(R.id.timeEnd)
         val sessionDate = view.findViewById<Button>(R.id.date)
+        val clear = view.findViewById<Button>(R.id.clear2)
 
 
 
@@ -73,13 +74,31 @@ class ViewDataFragment : Fragment() {
         graph.setDomainBoundaries(domBounds.first, domBounds.second, BoundaryMode.FIXED)
         graph.setRangeBoundaries(0, 5, BoundaryMode.FIXED)
 
+        clear.setOnClickListener{
+            timeStart.text = "Time Start"
+            timeEnd.text = "Time End"
+            sessionDate.text = "Date"
+            startHour = -1
+            endHour = -1
+            startMinute = -1
+            endMinute = -1
+            dataStartHour = -1
+            dataStartMin = -1
+            dataEndHour = -1
+            dataEndMin = -1
+            dateText = ""
+            Toast.makeText(requireActivity().application, "Query Cleared!", Toast.LENGTH_SHORT).show()
+        }
+
         timeStart.setOnClickListener{
             startHour = times?.getInt("start hour", -1) ?: -1
             startMinute = times?.getInt("start minute", -1) ?: -1
+            val timeStartHour = if (startHour < 0) 7 else startHour
+            val timeStartMinute = if (startMinute < 0) 0 else startMinute
             val startTimePicker: MaterialTimePicker = MaterialTimePicker.Builder()
                 .setTitleText("Select Time Start")
-                .setHour(startHour)
-                .setMinute(startMinute)
+                .setHour(timeStartHour)
+                .setMinute(timeStartMinute)
                 .setTimeFormat(TimeFormat.CLOCK_12H)
                 .build()
             startTimePicker.show(requireActivity().supportFragmentManager, "data start")
@@ -93,10 +112,12 @@ class ViewDataFragment : Fragment() {
         timeEnd.setOnClickListener{
             endHour = times?.getInt("end hour", -1) ?: -1
             endMinute = times?.getInt("end minute", -1) ?: -1
+            val timeEndHour = if (endHour < 0) 7 else endHour
+            val timeEndMinute = if (endMinute < 0) 30 else endMinute
             val endTimePicker: MaterialTimePicker = MaterialTimePicker.Builder()
                 .setTitleText("Select Time End")
-                .setHour(endHour)
-                .setMinute(endMinute)
+                .setHour(timeEndHour)
+                .setMinute(timeEndMinute)
                 .setTimeFormat(TimeFormat.CLOCK_12H)
                 .build()
             endTimePicker.show(requireActivity().supportFragmentManager, "data end")
