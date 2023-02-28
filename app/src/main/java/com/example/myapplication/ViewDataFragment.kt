@@ -78,15 +78,13 @@ class ViewDataFragment : Fragment() {
             timeStart.text = "Time Start"
             timeEnd.text = "Time End"
             sessionDate.text = "Date"
-            startHour = -1
-            endHour = -1
-            startMinute = -1
-            endMinute = -1
             dataStartHour = -1
             dataStartMin = -1
             dataEndHour = -1
             dataEndMin = -1
             dateText = ""
+            graph.clear()
+            graph.redraw()
             Toast.makeText(requireActivity().application, "Query Cleared!", Toast.LENGTH_SHORT).show()
         }
 
