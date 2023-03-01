@@ -53,11 +53,11 @@ class ViewDataFragment : Fragment() {
         var startMinute: Int = UNINITIALIZED
         var endHour: Int = UNINITIALIZED
         var endMinute :Int = UNINITIALIZED
+        val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
 
 
         @RequiresApi(Build.VERSION_CODES.O)
         fun queryTimes() {
-            val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
             val interval = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 cloudClient.queryInterval()
             } else {
@@ -200,7 +200,7 @@ class ViewDataFragment : Fragment() {
                 }
 
                 else{
-                    val updatedData: MutableList<Pair<Double, Double>> = updateGraph(sesDate, alarmTimes)
+                    val updatedData: MutableList<Pair<Double, Double>> = updateGraph(sesDate, alarmTimes, cloudClient)
                     if(dataStartHour >= 12 && dataEndHour == 0){
                         val minInterval = timeToDouble(dataStartHour - 12, dataStartMin)
                         val maxInterval = timeToDouble(12, dataEndMin)
@@ -264,8 +264,7 @@ class ViewDataFragment : Fragment() {
 
     }
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun updateGraph(sesDate: LocalDate, times: Pair<LocalTime, LocalTime>): MutableList<Pair<Double, Double>> {
-        val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
+    private fun updateGraph(sesDate: LocalDate, times: Pair<LocalTime, LocalTime>, cloudClient: CloudClient): MutableList<Pair<Double, Double>> {
 //        val dateString = sesDate.format(DateTimeFormatter.ISO_DATE)
         val parsedCloudData = mutableListOf<Pair<Double,Double>>()
         val endDate = sesDate

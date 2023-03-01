@@ -44,6 +44,7 @@ class SetAlarmFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
         super.onViewCreated(view, savedInstanceState)
         val alarmStart: Button = view.findViewById(R.id.alarmStart)
         val alarmEnd: Button = view.findViewById(R.id.alarmEnd)
@@ -78,7 +79,6 @@ class SetAlarmFragment : Fragment() {
         @RequiresApi(Build.VERSION_CODES.O)
         fun queryTimes(): Boolean{
             var saved = true
-            val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
             val interval = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 cloudClient.queryInterval()
             } else {
@@ -107,7 +107,6 @@ class SetAlarmFragment : Fragment() {
         }
         @RequiresApi(Build.VERSION_CODES.O)
         fun updateTimes(startHour: Int, startMinute: Int, endHour: Int, endMinute: Int){
-            val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
             if(AlarmClock.notInitiated(startHour,startMinute, endHour, endMinute)){
                 cloudClient.updateInterval(CLEAR, CLEAR)
             }
