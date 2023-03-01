@@ -24,10 +24,15 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import java.io.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+private const val TIME_START = "Time Start"
+private const val TIME_END = "Time End"
+private const val UNINITIALIZED = -1
+private val NO_DATETIME_STRING = null
+private const val CLEAR = "clear"
 
 class ViewDataFragment : Fragment() {
 
@@ -43,11 +48,40 @@ class ViewDataFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val times = context?.getSharedPreferences("times", Context.MODE_PRIVATE)
-        var startHour : Int = times?.getInt("start hour", -1) ?: -1
-        var startMinute: Int = times?.getInt("start minute", -1) ?: -1
-        var endHour: Int = times?.getInt("end hour", -1) ?: -1
-        var endMinute :Int = times?.getInt("end minute", -1) ?: -1
+        //TODO: change to query cloud
+        var startHour : Int = UNINITIALIZED
+        var startMinute: Int = UNINITIALIZED
+        var endHour: Int = UNINITIALIZED
+        var endMinute :Int = UNINITIALIZED
+
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun queryTimes() {
+            val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
+            val interval = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                cloudClient.queryInterval()
+            } else {
+                TODO("VERSION.SDK_INT < O")
+            }
+
+            if(interval.first != NO_DATETIME_STRING && interval.first != CLEAR
+                && interval.second != NO_DATETIME_STRING && interval.second != CLEAR){
+                val startDatetime = LocalDateTime.parse(interval.first)
+                val endDatetime = LocalDateTime.parse(interval.second)
+                startHour = startDatetime.hour
+                startMinute = startDatetime.minute
+                endHour = endDatetime.hour
+                endMinute = endDatetime.minute
+            }
+            else{
+                startHour = UNINITIALIZED
+                startMinute = UNINITIALIZED
+                endHour = UNINITIALIZED
+                endMinute = UNINITIALIZED
+            }
+
+        }
+        queryTimes()
         var domBounds = getDomBounds(startHour, startMinute, endHour, endMinute)
 
         val sleepDataX = mutableListOf<Double>()
@@ -64,10 +98,10 @@ class ViewDataFragment : Fragment() {
 
 
 
-        var dataStartHour = -1
-        var dataStartMin = -1
-        var dataEndHour = -1
-        var dataEndMin = -1
+        var dataStartHour = UNINITIALIZED
+        var dataStartMin = UNINITIALIZED
+        var dataEndHour = UNINITIALIZED
+        var dataEndMin = UNINITIALIZED
         var dateText = ""
 
         graph.addSeries(dataSeries, dataFormat)
@@ -75,13 +109,13 @@ class ViewDataFragment : Fragment() {
         graph.setRangeBoundaries(0, 5, BoundaryMode.FIXED)
 
         clear.setOnClickListener{
-            timeStart.text = "Time Start"
-            timeEnd.text = "Time End"
+            timeStart.text = TIME_START
+            timeEnd.text = TIME_END
             sessionDate.text = "Date"
-            dataStartHour = -1
-            dataStartMin = -1
-            dataEndHour = -1
-            dataEndMin = -1
+            dataStartHour = UNINITIALIZED
+            dataStartMin = UNINITIALIZED
+            dataEndHour = UNINITIALIZED
+            dataEndMin = UNINITIALIZED
             dateText = ""
             graph.clear()
             graph.redraw()
@@ -89,8 +123,7 @@ class ViewDataFragment : Fragment() {
         }
 
         timeStart.setOnClickListener{
-            startHour = times?.getInt("start hour", -1) ?: -1
-            startMinute = times?.getInt("start minute", -1) ?: -1
+            queryTimes()
             val timeStartHour = if (startHour < 0) 7 else startHour
             val timeStartMinute = if (startMinute < 0) 0 else startMinute
             val startTimePicker: MaterialTimePicker = MaterialTimePicker.Builder()
@@ -103,13 +136,12 @@ class ViewDataFragment : Fragment() {
             startTimePicker.addOnPositiveButtonClickListener {
                 dataStartHour = startTimePicker.hour
                 dataStartMin= startTimePicker.minute
-                setAlarm(startTimePicker, timeStart)
+                setAlarm(startTimePicker, timeStart, TIME_START)
             }
 
         }
         timeEnd.setOnClickListener{
-            endHour = times?.getInt("end hour", -1) ?: -1
-            endMinute = times?.getInt("end minute", -1) ?: -1
+            queryTimes()
             val timeEndHour = if (endHour < 0) 7 else endHour
             val timeEndMinute = if (endMinute < 0) 30 else endMinute
             val endTimePicker: MaterialTimePicker = MaterialTimePicker.Builder()
@@ -122,7 +154,7 @@ class ViewDataFragment : Fragment() {
             endTimePicker.addOnPositiveButtonClickListener {
                 dataEndHour = endTimePicker.hour
                 dataEndMin = endTimePicker.minute
-                setAlarm(endTimePicker, timeEnd)
+                setAlarm(endTimePicker, timeEnd, TIME_END)
             }
 
         }
@@ -234,18 +266,19 @@ class ViewDataFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateGraph(sesDate: LocalDate, times: Pair<LocalTime, LocalTime>): MutableList<Pair<Double, Double>> {
         val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
-        val dateString = sesDate.format(DateTimeFormatter.ISO_DATE)
+//        val dateString = sesDate.format(DateTimeFormatter.ISO_DATE)
         val parsedCloudData = mutableListOf<Pair<Double,Double>>()
         val endDate = sesDate
         // for right now, I am allowing 12:00 am end times be valid for the database. This could be considered unacceptable in later editions.
         if(times.second.hour == 0 && times.first.hour != 0){
             endDate.minusDays(-1)
         }
-        val startInterval = ZonedDateTime.of(sesDate, times.first, ZonedDateTime.now().zone)
-        val endInterval = ZonedDateTime.of(endDate, times.second, ZonedDateTime.now().zone)
+        val startInterval = LocalDateTime.of(sesDate, times.first)
+        val endInterval = LocalDateTime.of(endDate, times.second)
         val startString = startInterval.format(DateTimeFormatter.ISO_DATE_TIME)
         val endString = endInterval.format(DateTimeFormatter.ISO_DATE_TIME)
-        val cloudData = cloudClient.querySoundData(dateString, startString, endString)
+//        val cloudData = cloudClient.querySoundData(dateString, startString, endString)
+        val cloudData = cloudClient.querySoundData(startString, endString)
         for(data: Pair<String, Double> in cloudData) {
             parsedCloudData.add(getCloudDataPoint(data.first, data.second))
         }
@@ -261,7 +294,7 @@ class ViewDataFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun getCloudDataPoint(timestamp: String, amplitude: Double): Pair<Double, Double>{
-        val datetime = ZonedDateTime.parse(timestamp)
+        val datetime = LocalDateTime.parse(timestamp)
         val time: Double = timeToDouble(datetime.hour,datetime.minute)
         return Pair(time,amplitude)
     }

@@ -8,23 +8,30 @@ import java.time.LocalDate
 import java.time.Month
 
 object AlarmClock {
-    fun  getAlarmTime(h: Int, min: Int):String {
-        var hour = h
-        var am_pm = "AM"
-        if(hour > 12){
-            hour -= 12
-            am_pm = "PM"
+    fun  getAlarmTime(h: Int, min: Int, returnText: String):String {
+        return if(notInitiatedClock(h, min)){
+            returnText
+        } else{
+            var hour = h
+            var ampm = "AM"
+            if(hour > 12){
+                hour -= 12
+                ampm = "PM"
+            } else if(hour == 0){
+                hour = 12
+            }
+            String.format("%02d:%02d %s", hour, min, ampm)
         }
-        else if(hour == 0){
-            hour = 12
-        }
-        return String.format("%02d:%02d %s", hour, min, am_pm)
+
     }
     fun notInitiated(startHour: Int, startMinute: Int, endHour: Int, endMinute: Int): Boolean{
         return startHour == -1 ||startMinute == -1 || endHour == -1 || endMinute == -1
     }
-    fun setAlarm(picker: MaterialTimePicker, btn: Button) {
-        btn.text = getAlarmTime(picker.hour, picker.minute)
+    fun notInitiatedClock(h: Int, m: Int): Boolean {
+        return h == -1 || m == -1
+    }
+    fun setAlarm(picker: MaterialTimePicker, btn: Button, returnText: String) {
+        btn.text = getAlarmTime(picker.hour, picker.minute, returnText)
     }
 }
 

@@ -16,7 +16,7 @@ fun main() {
     val data: Array<Pair<String, Double>> = arrayOf(Pair(timestamp, 0.0))
 
 
-    cloudClient.uploadSoundData(data)
+//    cloudClient.uploadSoundData(data)
 
     val cloudData = cloudClient.querySoundData(dateString)
     // visualize cloud data in app
