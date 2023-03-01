@@ -276,7 +276,6 @@ class ViewDataFragment : Fragment() {
         val endInterval = LocalDateTime.of(endDate, times.second)
         val startString = startInterval.format(DateTimeFormatter.ISO_DATE_TIME)
         val endString = endInterval.format(DateTimeFormatter.ISO_DATE_TIME)
-//        val cloudData = cloudClient.querySoundData(dateString, startString, endString)
         val cloudData = cloudClient.querySoundData(startString, endString)
         for(data: Pair<String, Double> in cloudData) {
             parsedCloudData.add(getCloudDataPoint(data.first, data.second))
