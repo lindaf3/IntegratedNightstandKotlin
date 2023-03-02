@@ -1,10 +1,12 @@
 package com.example.myapplication
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.widget.Button
 import androidx.annotation.RequiresApi
 import com.google.android.material.timepicker.MaterialTimePicker
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Month
 
 object AlarmClock {
@@ -34,7 +36,13 @@ object AlarmClock {
         btn.text = getAlarmTime(picker.hour, picker.minute, returnText)
     }
 }
+object Datetime{
+    @SuppressLint("SetTextI18n")
+    fun setDatetime(datetime: LocalDateTime, dateText: String, btn: Button) {
+        btn.text = dateText + "\n at \n" +AlarmClock.getAlarmTime(datetime.hour, datetime.minute,"INVALID TIME");
+    }
 
+}
 object Date {
     fun setDate(sesDate: String, btn: Button) {
         btn.text = sesDate

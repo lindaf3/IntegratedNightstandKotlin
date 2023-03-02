@@ -3,7 +3,6 @@ package com.example.myapplication
 import Amplitude
 import CloudClient
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import android.media.*
 import android.os.Build
@@ -15,6 +14,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import com.androidplot.xy.*
 import com.example.myapplication.AlarmClock.setAlarm
 import com.example.myapplication.Date.setDate
@@ -30,9 +30,10 @@ import java.time.format.DateTimeFormatter
 
 private const val TIME_START = "Time Start"
 private const val TIME_END = "Time End"
-private const val UNINITIALIZED = -1
+private const val UNINITIALIZED_INT = -1
 private val NO_DATETIME_STRING = null
 private const val CLEAR = "clear"
+private const val UNINITIALIZED_DATE_TEXT = "INVALID"
 
 class ViewDataFragment : Fragment() {
 
@@ -48,11 +49,10 @@ class ViewDataFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //TODO: change to query cloud
-        var startHour : Int = UNINITIALIZED
-        var startMinute: Int = UNINITIALIZED
-        var endHour: Int = UNINITIALIZED
-        var endMinute :Int = UNINITIALIZED
+        var startHour : Int = UNINITIALIZED_INT
+        var startMinute: Int = UNINITIALIZED_INT
+        var endHour: Int = UNINITIALIZED_INT
+        var endMinute :Int = UNINITIALIZED_INT
         val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
 
 
@@ -74,10 +74,10 @@ class ViewDataFragment : Fragment() {
                 endMinute = endDatetime.minute
             }
             else{
-                startHour = UNINITIALIZED
-                startMinute = UNINITIALIZED
-                endHour = UNINITIALIZED
-                endMinute = UNINITIALIZED
+                startHour = UNINITIALIZED_INT
+                startMinute = UNINITIALIZED_INT
+                endHour = UNINITIALIZED_INT
+                endMinute = UNINITIALIZED_INT
             }
 
         }
@@ -98,11 +98,11 @@ class ViewDataFragment : Fragment() {
 
 
 
-        var dataStartHour = UNINITIALIZED
-        var dataStartMin = UNINITIALIZED
-        var dataEndHour = UNINITIALIZED
-        var dataEndMin = UNINITIALIZED
-        var dateText = ""
+        var dataStartHour = UNINITIALIZED_INT
+        var dataStartMin = UNINITIALIZED_INT
+        var dataEndHour = UNINITIALIZED_INT
+        var dataEndMin = UNINITIALIZED_INT
+        var dateText = UNINITIALIZED_DATE_TEXT
 
         graph.addSeries(dataSeries, dataFormat)
         graph.setDomainBoundaries(domBounds.first, domBounds.second, BoundaryMode.FIXED)
@@ -112,10 +112,10 @@ class ViewDataFragment : Fragment() {
             timeStart.text = TIME_START
             timeEnd.text = TIME_END
             sessionDate.text = "Date"
-            dataStartHour = UNINITIALIZED
-            dataStartMin = UNINITIALIZED
-            dataEndHour = UNINITIALIZED
-            dataEndMin = UNINITIALIZED
+            dataStartHour = UNINITIALIZED_INT
+            dataStartMin = UNINITIALIZED_INT
+            dataEndHour = UNINITIALIZED_INT
+            dataEndMin = UNINITIALIZED_INT
             dateText = ""
             graph.clear()
             graph.redraw()
@@ -167,6 +167,35 @@ class ViewDataFragment : Fragment() {
                 dateText = datePicker.headerText
                 setDate(dateText, sessionDate)
             }
+        }
+
+
+
+        val button = view.findViewById<Button>(R.id.button)
+        button.setOnClickListener(){
+            queryTimes()
+            val recentDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(startHour, startMinute))
+            var dialog = DatetimePickerFragment(recentDatetime, "Select Time Start")
+            dialog.show(requireActivity().supportFragmentManager, "test")
+            setFragmentResultListener("requestKey") { _, bundle ->
+                val undo = bundle.getBoolean("cancel")
+                if(!undo){
+                    val validData = bundle.getBoolean("use?")
+                    if(validData){
+                        val datetimeText = bundle.getString("datetimeText")
+                        val dateText = bundle.getString("dateText") ?: UNINITIALIZED_DATE_TEXT
+                        val datetime = LocalDateTime.parse(datetimeText)
+                        Datetime.setDatetime(datetime, dateText, button)
+                    }
+                    else{
+                        button.text = "Button"
+                        Toast.makeText(requireActivity().application, "Invalid Datetime", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+
+            }
+
         }
 
 
