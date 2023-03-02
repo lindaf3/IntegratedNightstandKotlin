@@ -39,7 +39,7 @@ class SetAlarmFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_set_alarm, container, false)
+        return inflater.inflate(R.layout.layout_set_alarm, container, false)
     }
 
     @SuppressLint("SetTextI18n")

@@ -8,6 +8,7 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.format.DateTimeFormatter
 
 object AlarmClock {
     fun  getAlarmTime(h: Int, min: Int, returnText: String):String {
@@ -36,13 +37,7 @@ object AlarmClock {
         btn.text = getAlarmTime(picker.hour, picker.minute, returnText)
     }
 }
-object Datetime{
-    @SuppressLint("SetTextI18n")
-    fun setDatetime(datetime: LocalDateTime, dateText: String, btn: Button) {
-        btn.text = dateText + "\n at \n" +AlarmClock.getAlarmTime(datetime.hour, datetime.minute,"INVALID TIME");
-    }
 
-}
 object Date {
     fun setDate(sesDate: String, btn: Button) {
         btn.text = sesDate

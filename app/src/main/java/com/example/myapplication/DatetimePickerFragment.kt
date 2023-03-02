@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -31,7 +32,7 @@ class DatetimePickerFragment(recent: LocalDateTime, val title: String = "Select 
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        var view: View = inflater.inflate(R.layout.fragment_custom_dialog, container, false)
+        val view: View = inflater.inflate(R.layout.layout_custom_dialog, container, false)
         val setTime: Button = view.findViewById(R.id.timeSelector)
         val setDate: Button = view.findViewById(R.id.dateSelector)
         val set: Button = view.findViewById(R.id.datetimePickerSet)
@@ -106,7 +107,6 @@ class DatetimePickerFragment(recent: LocalDateTime, val title: String = "Select 
             bundle.putBoolean("use?", valid)
             if(valid){
                 bundle.putString("datetimeText", datetime.format(DateTimeFormatter.ISO_DATE_TIME))
-                bundle.putString("dateText", dateText)
             }
         }
 
@@ -130,5 +130,13 @@ class DatetimePickerFragment(recent: LocalDateTime, val title: String = "Select 
         private const val UNINITIALIZED_TIME = -1
 
 
+    }
+}
+
+object Datetime{
+    @SuppressLint("SetTextI18n")
+    fun setDatetime(datetime: LocalDateTime, btn: Button) {
+        val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
+        btn.text = datetime.format(formatter) + " " +AlarmClock.getAlarmTime(datetime.hour, datetime.minute,"INVALID TIME");
     }
 }
