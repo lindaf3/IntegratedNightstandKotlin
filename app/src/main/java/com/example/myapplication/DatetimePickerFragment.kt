@@ -2,12 +2,14 @@ package com.example.myapplication
 
 import android.annotation.SuppressLint
 import android.content.DialogInterface
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -17,21 +19,26 @@ import com.google.android.material.timepicker.TimeFormat
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
-class DatetimePickerFragment(recent: LocalDateTime, val title: String = "Select Datetime:"): DialogFragment() {
+class DatetimePickerFragment(recent: LocalDateTime, private val title: String = "Select Datetime:"): DialogFragment() {
 
     var datetime = recent
+    @RequiresApi(Build.VERSION_CODES.O)
     var hour = recent.hour
+    @RequiresApi(Build.VERSION_CODES.O)
     var minute = recent.minute
+    @RequiresApi(Build.VERSION_CODES.O)
     var date = recent.toLocalDate()
     var dateText =  UNINITIALIZED_DATE
     var undo = false
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val view: View = inflater.inflate(R.layout.layout_custom_dialog, container, false)
         val setTime: Button = view.findViewById(R.id.timeSelector)
         val setDate: Button = view.findViewById(R.id.dateSelector)
@@ -99,6 +106,7 @@ class DatetimePickerFragment(recent: LocalDateTime, val title: String = "Select 
         return view
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onDismiss(dialog: DialogInterface) {
         val bundle = Bundle()
         bundle.putBoolean("cancel", undo)
@@ -116,6 +124,7 @@ class DatetimePickerFragment(recent: LocalDateTime, val title: String = "Select 
         super.onDismiss(dialog)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun validData(): Boolean{
         return (dateText != UNINITIALIZED_DATE && hour != UNINITIALIZED_TIME && minute != UNINITIALIZED_TIME)
     }
@@ -134,9 +143,14 @@ class DatetimePickerFragment(recent: LocalDateTime, val title: String = "Select 
 }
 
 object Datetime{
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
     fun setDatetime(datetime: LocalDateTime, btn: Button) {
         val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
         btn.text = datetime.format(formatter) + " " +AlarmClock.getAlarmTime(datetime.hour, datetime.minute,"INVALID TIME");
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun datetimeToDouble(startDatetime: LocalDateTime?, endDatetime: LocalDateTime?): Double{
+        return ChronoUnit.MINUTES.between(startDatetime, endDatetime)/60.0
     }
 }

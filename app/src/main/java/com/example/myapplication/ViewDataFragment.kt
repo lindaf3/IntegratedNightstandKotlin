@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-import Amplitude
 import CloudClient
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -16,11 +15,13 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import com.androidplot.xy.*
+import com.example.myapplication.Datetime.datetimeToDouble
 import java.io.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+
 
 private const val TIME_START = "FROM"
 private const val TIME_END = "TO"
@@ -50,6 +51,8 @@ class ViewDataFragment : Fragment() {
         val cloudClient = CloudClient("/path/key.pem", "longAPIToken")
 
 
+
+
         @RequiresApi(Build.VERSION_CODES.O)
         fun queryTimes() {
             val interval = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -77,7 +80,13 @@ class ViewDataFragment : Fragment() {
         }
         queryTimes()
 
-        var domBounds = getDomBounds(startHour, startMinute, endHour, endMinute)
+        val alarmStartDatetime: LocalDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(startHour, startMinute))
+        val alarmEndDatetime: LocalDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(endHour, endMinute))
+        var timeStartDatetime: LocalDateTime? = alarmStartDatetime
+        var timeEndDatetime: LocalDateTime? = alarmEndDatetime
+
+
+        var domBounds = getDomBounds(alarmStartDatetime, alarmEndDatetime)
 
         val sleepDataX = mutableListOf<Double>()
         val sleepData = mutableListOf<Double>()
@@ -90,9 +99,13 @@ class ViewDataFragment : Fragment() {
         val timeEnd = view.findViewById<Button>(R.id.timeEnd)
         val clear = view.findViewById<Button>(R.id.clear)
 
-        
-        var timeStartDatetime: LocalDateTime? = null
-        var timeEndDatetime: LocalDateTime? = null
+        if (timeStartDatetime != null) {
+            Datetime.setDatetime(timeStartDatetime, timeStart)
+        }
+        if (timeEndDatetime != null) {
+            Datetime.setDatetime(timeEndDatetime, timeEnd)
+        }
+
 
         graph.addSeries(dataSeries, dataFormat)
         graph.setDomainBoundaries(domBounds.first, domBounds.second, BoundaryMode.FIXED)
@@ -170,7 +183,7 @@ class ViewDataFragment : Fragment() {
             val endString: String = endInterval?.format(DateTimeFormatter.ISO_DATE_TIME) ?: UNINITIALIZED_DATE_TEXT
             val cloudData = cloudClient.querySoundData(startString, endString)
             for(data: Pair<String, Double> in cloudData) {
-                parsedCloudData.add(getCloudDataPoint(data.first, data.second))
+                parsedCloudData.add(getCloudDataPoint(data.first, data.second, startInterval))
             }
             return parsedCloudData
         }
@@ -186,34 +199,14 @@ class ViewDataFragment : Fragment() {
                 graph.redraw()
             }
             else{
-                val dataStartHour = timeStartDatetime?.hour ?: UNINITIALIZED_INT
-                val dataStartMin = timeStartDatetime?.minute ?: UNINITIALIZED_INT
-                val dataEndHour = timeEndDatetime?.hour ?: UNINITIALIZED_INT
-                val dataEndMin = timeEndDatetime?.minute ?: UNINITIALIZED_INT
                 val updatedData = updateGraph(timeStartDatetime, timeEndDatetime, cloudClient)
-                if(dataStartHour >= 12 && dataEndHour == 0){
-                    val minInterval = timeToDouble(dataStartHour - 12, dataStartMin)
-                    val maxInterval = timeToDouble(12, dataEndMin)
-                    for ( (time,amplitude) in updatedData) {
-                        val newTime = time-12
-                        if(withinRange(newTime, minInterval, maxInterval)){
-                            sleepDataX.add(newTime)
-                            sleepData.add(amplitude)
-                        }
-                    }
-                    //mock code: can delete later
-                    sleepData.add(maxInterval)
-                    sleepDataX.add(Amplitude.getAmplitude())
-                }
-                else{
 
-                    val minInterval = timeToDouble(dataStartHour, dataStartMin)
-                    val maxInterval = timeToDouble(dataEndHour, dataEndMin)
-                    for ( (time,amplitude) in updatedData) {
-                        if(withinRange(time, minInterval, maxInterval)){
-                            sleepDataX.add(time)
-                            sleepData.add(amplitude)
-                        }
+
+                domBounds = getDomBounds(timeStartDatetime, timeEndDatetime)
+                for ( (time,amplitude) in updatedData) {
+                    if(withinRange(time, domBounds.first, domBounds.second)){
+                        sleepDataX.add(time)
+                        sleepData.add(amplitude)
                     }
                 }
                 dataSeries = SimpleXYSeries(sleepDataX, sleepData, "Sleep Data" )
@@ -236,35 +229,24 @@ class ViewDataFragment : Fragment() {
 
 
 
-    private fun getDomBounds(startHour: Int, startMinute: Int, endHour: Int, endMinute: Int): Pair<Double, Double>
-    {
-        var domLow = timeToDouble(startHour, startMinute)
-        var domHigh = timeToDouble(endHour, endMinute)
-        if(AlarmClock.notInitiated(startHour, startMinute, endHour, endMinute)){
-            domHigh = 24.0
-            domLow = 0.0
-        }
-        if(endHour == 0 && startHour != 0){
-            domHigh = timeToDouble(12,endMinute)
-            if(startHour >= 12){
-                domLow = timeToDouble(startHour - 12,endHour)
-            }
-        }
-        return Pair(domLow, domHigh)
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getDomBounds(start: LocalDateTime?, end: LocalDateTime?):  Pair<Double, Double>{
+        val bounds = Pair(datetimeToDouble(start, start), datetimeToDouble(start, end))
+        println(bounds)
+        return bounds
 
     }
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun getCloudDataPoint(timestamp: String, amplitude: Double): Pair<Double, Double>{
-        val datetime = LocalDateTime.parse(timestamp)
-        val time: Double = timeToDouble(datetime.hour,datetime.minute)
+    private fun getCloudDataPoint(timestamp: String, amplitude: Double, startDatetime: LocalDateTime?): Pair<Double, Double>{
+        val endDatetime = LocalDateTime.parse(timestamp)
+        val time: Double = datetimeToDouble(startDatetime, endDatetime)
         return Pair(time,amplitude)
     }
 
-    private fun timeToDouble(hour: Int, min: Int): Double{
-        return hour + min/60.0
-    }
+
     private fun withinRange(time: Double, minInterval: Double, maxInterval: Double): Boolean{
         return time in minInterval..maxInterval
     }

@@ -2,8 +2,10 @@ import Amplitude.getAmplitude
 import android.os.Build
 import androidx.annotation.RequiresApi
 import java.lang.Integer.max
+import java.lang.Integer.min
 import java.time.*
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 class APIClient(token: String) {
     var recentStartDateTime: String = ""
@@ -15,18 +17,33 @@ class APIClient(token: String) {
         recentStartDateTime = startDatetime.format(DateTimeFormatter.ISO_DATE_TIME)
         val endDatetime = startDatetime.minusHours(-1)
         recentEndDateTime = endDatetime.format(DateTimeFormatter.ISO_DATE_TIME)
+        println(recentStartDateTime)
+        println(recentEndDateTime)
     }
+
+
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun querySoundData(from: String, to: String): MutableList<Pair<String, Double>> {
         val cloudData = mutableListOf<Pair<String, Double>>()
-        val startDatetime = LocalDateTime.parse(from)
-        val endDatetime = LocalDateTime.parse(to)
-        val minutes: Int = timeDifferenceInMinutes(startDatetime, endDatetime)
-        val dataPoints: Int = max((minutes*Math.random()).toInt() - 1, 1)
-        for(i in 0..dataPoints){
-            cloudData.add(Pair( addTime(startDatetime, i), getAmplitude()))
+        val startDateTime = LocalDateTime.parse(from)
+        val endDateTime = LocalDateTime.parse(to)
+
+
+        val minutes = ChronoUnit.MINUTES.between(startDateTime, endDateTime)
+        val maxDataPoints = (Math.random()*50).toInt()
+        val minutesList = mutableListOf<Long>()
+        for (i in 0.. maxDataPoints){
+            minutesList.add((minutes*Math.random() + 1).toLong())
         }
-        cloudData.add(Pair(to, getAmplitude()))
+        minutesList.sort()
+        for(i in 0..maxDataPoints){
+            val randomDatetime = endDateTime.minusMinutes(minutesList[i])
+            if(randomDatetime != startDateTime){
+                cloudData.add(Pair(randomDatetime.format(DateTimeFormatter.ISO_DATE_TIME), getAmplitude()))
+            }
+
+        }
         return cloudData;
     }
 
@@ -43,18 +60,6 @@ class APIClient(token: String) {
         recentEndDateTime = to
     }
 
-
-    // assuming this would only be called when the dates are the same
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun timeDifferenceInMinutes(startDatetime: LocalDateTime, endDatetime: LocalDateTime): Int {
-        return (endDatetime.hour - startDatetime.hour)*60 + endDatetime.minute - startDatetime.minute
-
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun addTime(datetime: LocalDateTime, minutes: Int): String {
-        return datetime.minusMinutes(-minutes.toLong()).format(DateTimeFormatter.ISO_DATE_TIME)
-    }
 
 }
 object Amplitude{

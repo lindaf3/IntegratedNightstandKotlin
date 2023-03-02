@@ -20,7 +20,11 @@ object AlarmClock {
             if(hour > 12){
                 hour -= 12
                 ampm = "PM"
-            } else if(hour == 0){
+            }
+            else if(hour == 12){
+                ampm ="PM"
+            }
+            else if(hour == 0){
                 hour = 12
             }
             String.format("%02d:%02d %s", hour, min, ampm)
