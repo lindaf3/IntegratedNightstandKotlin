@@ -19,5 +19,6 @@
     <string name="fetch">fetch</string>
     <string name="time_end">Time End</string>
     <string name="date">Date</string>
+    <string name="load">load</string>
 
 </resources>

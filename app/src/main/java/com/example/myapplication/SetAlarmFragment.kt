@@ -50,6 +50,7 @@ class SetAlarmFragment : Fragment() {
         val alarmEnd: Button = view.findViewById(R.id.alarmEnd)
         val alarmSet: Button = view.findViewById(R.id.alarmSetter)
         val clear: Button = view.findViewById(R.id.clear)
+        val load: Button = view.findViewById(R.id.load)
         var startHour : Int = UNINITIALIZED
         var startMinute: Int = UNINITIALIZED
         var endHour: Int = UNINITIALIZED
@@ -123,15 +124,24 @@ class SetAlarmFragment : Fragment() {
 
         }
 
-        val successfulQuery = queryTimes()
+        fun queryTimesWithToast(){
+            val successfulQuery = queryTimes()
 
-        if(successfulQuery){
-            Toast.makeText(requireActivity().application, "Alarm set based on saved data", Toast.LENGTH_SHORT).show()
-        }
-        else{
-            Toast.makeText(requireActivity().application, "No saved alarm data available", Toast.LENGTH_SHORT).show()
+            if(successfulQuery){
+                Toast.makeText(requireActivity().application, "Alarm set based on saved data", Toast.LENGTH_SHORT).show()
+            }
+            else{
+                Toast.makeText(requireActivity().application, "No saved alarm data available", Toast.LENGTH_SHORT).show()
+            }
+
+
         }
 
+        queryTimesWithToast()
+
+        load.setOnClickListener{
+            queryTimesWithToast()
+        }
 
 //        activity?.runOnUiThread(Runnable{
 //            Timer().scheduleAtFixedRate(object: TimerTask() {
